@@ -16,6 +16,13 @@ type SellingRequestBody struct {
 	Seller       string  `json:"seller"`       //发起销售人、卖家(卖家AccountId)
 	Price        float64 `json:"price"`        //价格
 	SalePeriod   int     `json:"salePeriod"`   //智能合约的有效期(单位为天)
+
+	AgentId  string  `json:"agentId"`
+	From string  `json:"from"` 
+	FromDate string  `json:"fronDate"` 
+	To string  `json:"to"` 
+	ToDate string  `json:"toDate"` 
+
 }
 
 type SellingByBuyRequestBody struct {
@@ -63,6 +70,12 @@ func CreateSelling(c *gin.Context) {
 	bodyBytes = append(bodyBytes, []byte(body.Seller))
 	bodyBytes = append(bodyBytes, []byte(strconv.FormatFloat(body.Price, 'E', -1, 64)))
 	bodyBytes = append(bodyBytes, []byte(strconv.Itoa(body.SalePeriod)))
+
+	bodyBytes = append(bodyBytes, []byte(body.AgentId))
+	bodyBytes = append(bodyBytes, []byte(body.From))
+	bodyBytes = append(bodyBytes, []byte(body.FromDate))
+	bodyBytes = append(bodyBytes, []byte(body.To))
+	bodyBytes = append(bodyBytes, []byte(body.ToDate))
 	//调用智能合约
 	resp, err := bc.ChannelExecute("createSelling", bodyBytes)
 	if err != nil {

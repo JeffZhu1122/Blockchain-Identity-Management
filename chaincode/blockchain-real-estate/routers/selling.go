@@ -14,13 +14,21 @@ import (
 // CreateSelling 发起销售
 func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
-	if len(args) != 4 {
-		return shim.Error("参数个数不满足")
-	}
+	// if len(args) != 4 {
+	// 	return shim.Error("参数个数不满足")
+	// }
 	objectOfSale := args[0]
 	seller := args[1]
 	price := args[2]
 	salePeriod := args[3]
+	
+	agentId := args[4]
+	from := args[5]
+	fromDate := args[6]
+	to := args[7]
+	toDate := args[8]
+	
+
 	if objectOfSale == "" || seller == "" || price == "" || salePeriod == "" {
 		return shim.Error("参数存在空值")
 	}
@@ -37,20 +45,21 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	} else {
 		formattedSalePeriod = val
 	}
+
 	//判断objectOfSale是否属于seller
-	resultsRealEstate, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, []string{seller, objectOfSale})
-	if err != nil || len(resultsRealEstate) != 1 {
-		return shim.Error(fmt.Sprintf("验证%s属于%s失败: %s", objectOfSale, seller, err))
-	}
-	var realEstate lib.RealEstate
-	if err = json.Unmarshal(resultsRealEstate[0], &realEstate); err != nil {
-		return shim.Error(fmt.Sprintf("CreateSelling-反序列化出错: %s", err))
-	}
+	// resultsRealEstate, err := utils.GetStateByPartialCompositeKeys2(stub, lib.RealEstateKey, []string{seller, objectOfSale})
+	// if err != nil || len(resultsRealEstate) != 1 {
+	// 	return shim.Error(fmt.Sprintf("验证%s属于%s失败: %s", objectOfSale, seller, err))
+	// }
+	// var realEstate lib.RealEstate
+	// if err = json.Unmarshal(resultsRealEstate[0], &realEstate); err != nil {
+	// 	return shim.Error(fmt.Sprintf("CreateSelling-反序列化出错: %s", err))
+	// }
 	//判断记录是否已存在，不能重复发起销售
 	//若Encumbrance为true即说明此房产已经正在担保状态
-	if realEstate.Encumbrance {
-		return shim.Error("此房地产已经作为担保状态，不能重复发起销售")
-	}
+	// if realEstate.Encumbrance {
+	// 	return shim.Error("此房地产已经作为担保状态，不能重复发起销售")
+	// }
 	selling := &lib.Selling{
 		ObjectOfSale:  objectOfSale,
 		Seller:        seller,
@@ -59,16 +68,24 @@ func CreateSelling(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		CreateTime:    time.Now().Local().Format("2006-01-02 15:04:05"),
 		SalePeriod:    formattedSalePeriod,
 		SellingStatus: lib.SellingStatusConstant()["saleStart"],
+
+		RecordID: fmt.Sprintf("%d", time.Now().Local().UnixNano()),
+		From: from,
+		FromDate: fromDate,
+		To: to,
+		ToDate: toDate,
+		AgentID: agentId,
+		BranchID: "",
 	}
 	// 写入账本
 	if err := utils.WriteLedger(selling, stub, lib.SellingKey, []string{selling.Seller, selling.ObjectOfSale}); err != nil {
 		return shim.Error(fmt.Sprintf("%s", err))
 	}
 	//将房子状态设置为正在担保状态
-	realEstate.Encumbrance = true
-	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
-		return shim.Error(fmt.Sprintf("%s", err))
-	}
+	// realEstate.Status = "inState"
+	// if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
+	// 	return shim.Error(fmt.Sprintf("%s", err))
+	// }
 	//将成功创建的信息返回
 	sellingByte, err := json.Marshal(selling)
 	if err != nil {

@@ -32,3 +32,4 @@ func QueryAccountList(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	}
 	return shim.Success(accountListByte)
 }
+

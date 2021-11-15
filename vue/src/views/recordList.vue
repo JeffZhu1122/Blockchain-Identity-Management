@@ -1,55 +1,46 @@
 <template>
   <div class="container">
-    <el-alert
-      type="success"
-    >
-      <p>账户ID: {{ accountId }}</p>
-      <p>用户名: {{ userName }}</p>
-      <p>余额: ￥{{ balance }} 元</p>
-    </el-alert>
-    <div v-if="sellingList.length==0" style="text-align: center;">
-      <el-alert
-        title="查询不到数据"
-        type="warning"
-      />
-    </div>
-    <el-row v-loading="loading" :gutter="20">
-      <el-col v-for="(val,index) in sellingList" :key="index" :span="6" :offset="1">
-        <el-card class="all-card">
-          <div slot="header" class="clearfix">
-            <span>{{ val.sellingStatus }}</span>
-            <el-button v-if="roles[0] !== 'admin'&&(val.seller===accountId||val.buyer===accountId)&&val.sellingStatus!=='完成'&&val.sellingStatus!=='已过期'&&val.sellingStatus!=='已取消'" style="float: right; padding: 3px 0" type="text" @click="updateSelling(val,'cancelled')">取消</el-button>
-            <el-button v-if="roles[0] !== 'admin'&&val.seller===accountId&&val.sellingStatus==='交付中'" style="float: right; padding: 3px 8px" type="text" @click="updateSelling(val,'done')">确认收款</el-button>
-            <el-button v-if="roles[0] !== 'admin'&&val.sellingStatus==='销售中'&&val.seller!==accountId" style="float: right; padding: 3px 0" type="text" @click="createSellingByBuy(val)">购买</el-button>
-          </div>
-          <div class="item">
-            <el-tag>房产ID: </el-tag>
-            <span>{{ val.objectOfSale }}</span>
-          </div>
-          <div class="item">
-            <el-tag type="success">销售者ID: </el-tag>
-            <span>{{ val.seller }}</span>
-          </div>
-          <div class="item">
-            <el-tag type="danger">价格: </el-tag>
-            <span>￥{{ val.price }} 元</span>
-          </div>
-          <div class="item">
-            <el-tag type="warning">有效期: </el-tag>
-            <span>{{ val.salePeriod }} 天</span>
-          </div>
-          <div class="item">
-            <el-tag type="info">创建时间: </el-tag>
-            <span>{{ val.createTime }}</span>
-          </div>
-          <div class="item">
-            <el-tag>购买者ID: </el-tag>
-            <span v-if="val.buyer===''">虚位以待</span>
-            <span>{{ val.buyer }}</span>
-          </div>
-        </el-card>
+    <el-row>
+      <el-col :span=4>
+        <div class="search-Box">
+          <el-input placeholder="Keywords ..." icon="search"  class="search"  v-model="search"></el-input>
+        </div>
       </el-col>
+      <el-col :span=20><el-button style="float:right" @click="clearFilter">Clear Filter</el-button></el-col>
     </el-row>
+
+    <el-table class="data_table" ref="filterTable" :data="tables.slice((currentPage-1)*pagesize,currentPage*pagesize)" >
+      <el-table-column prop="recordId" label="ID" sortable >
+      </el-table-column>
+      <el-table-column prop="objectOfSale" label="People ID" sortable>
+      </el-table-column>
+      <el-table-column prop="agentId" label="Agent ID" sortable>
+      </el-table-column>
+      <el-table-column prop="branchId" label="Branch ID" sortable>
+      </el-table-column>
+      <el-table-column prop="from" label="From" sortable>
+      </el-table-column>
+      <el-table-column prop="fronDate" label="From Date" sortable>
+      </el-table-column>
+      <el-table-column prop="to" label="To" sortable>
+      </el-table-column>
+      <el-table-column prop="toDate" label="To Date" sortable>
+      </el-table-column>
+      <el-table-column prop="createTime" label="Checkin Date" sortable>
+      </el-table-column>
+
+    </el-table>
+    <div style="text-align: center;margin-top: 30px;">
+      <el-pagination
+        background
+        layout="prev, pager, next, total"
+        :total="total"
+        :page-size="pagesize"
+        @current-change="current_change">
+      </el-pagination>
+    </div>
+
+
   </div>
 </template>
 
@@ -61,6 +52,10 @@ export default {
   name: 'AllSelling',
   data() {
     return {
+      search: '',
+      total: 0,
+      pagesize:10,
+      currentPage:1,
       loading: true,
       sellingList: []
     }
@@ -71,7 +66,18 @@ export default {
       'roles',
       'userName',
       'balance'
-    ])
+    ]),
+    tables:function(){
+        var search=this.search;
+        if(search){
+          return  this.sellingList.filter(function(dataNews){
+            return Object.keys(dataNews).some(function(key){
+              return String(dataNews[key]).toLowerCase().indexOf(search) > -1
+            })
+          })
+        }
+        return this.sellingList
+      }
   },
   created() {
     querySellingList().then(response => {
@@ -84,6 +90,19 @@ export default {
     })
   },
   methods: {
+    clearFilter() {
+        this.$refs.filterTable.clearFilter();
+        this.search=""
+      },
+    current_change(currentPage){
+        this.currentPage = currentPage;
+      },
+    formatLevel(row, column) {
+      return row.gender === 'famale' ? 'Female' : 'Male'
+    },
+    filterHandler(value, row) {
+      return row.gender === value
+    },
     createSellingByBuy(item) {
       this.$confirm('是否立即购买?', '提示', {
         confirmButtonText: '确定',

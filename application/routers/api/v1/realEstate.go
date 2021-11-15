@@ -16,12 +16,24 @@ type RealEstateRequestBody struct {
 	Proprietor  string  `json:"proprietor"`  //所有者(业主)(业主AccountId)
 	TotalArea   float64 `json:"totalArea"`   //总面积
 	LivingSpace float64 `json:"livingSpace"` //生活空间
+
+	Firstname string  `json:"firstname"`
+	Lastname string  `json:"lastname"`
+	DOB string  `json:"dob"`
+	Gender string  `json:"gender"`
+	Status string  `json:"status"`
+	Photo string  `json:"photo"`
 }
 
 type RealEstateQueryRequestBody struct {
 	Proprietor string `json:"proprietor"` //所有者(业主)(业主AccountId)
 }
 
+type DeletePeopleRequestBody struct {
+	Key string  `json:"key"`
+	Id1 string  `json:"id1"`
+	Id2 string  `json:"id2"`
+}
 // @Summary 新建房地产(管理员)
 // @Param realEstate body RealEstateRequestBody true "realEstate"
 // @Produce  json
@@ -31,6 +43,8 @@ type RealEstateQueryRequestBody struct {
 func CreateRealEstate(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(RealEstateRequestBody)
+
+	fmt.Println(body)
 	//解析Body参数
 	if err := c.ShouldBind(body); err != nil {
 		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("参数出错%s", err.Error()))
@@ -45,6 +59,14 @@ func CreateRealEstate(c *gin.Context) {
 	bodyBytes = append(bodyBytes, []byte(body.Proprietor))
 	bodyBytes = append(bodyBytes, []byte(strconv.FormatFloat(body.TotalArea, 'E', -1, 64)))
 	bodyBytes = append(bodyBytes, []byte(strconv.FormatFloat(body.LivingSpace, 'E', -1, 64)))
+
+	bodyBytes = append(bodyBytes, []byte(body.Firstname))
+	bodyBytes = append(bodyBytes, []byte(body.Lastname))
+	bodyBytes = append(bodyBytes, []byte(body.DOB))
+	bodyBytes = append(bodyBytes, []byte(body.Gender))
+	bodyBytes = append(bodyBytes, []byte(body.Status))
+	bodyBytes = append(bodyBytes, []byte(body.Photo))
+
 	//调用智能合约
 	resp, err := bc.ChannelExecute("createRealEstate", bodyBytes)
 	if err != nil {
@@ -56,6 +78,38 @@ func CreateRealEstate(c *gin.Context) {
 		appG.Response(http.StatusInternalServerError, "失败", err.Error())
 		return
 	}
+	fmt.Println(data)
+	appG.Response(http.StatusOK, "成功", data)
+}
+
+func DeletePeople(c *gin.Context) {
+	appG := app.Gin{C: c}
+	body := new(DeletePeopleRequestBody)
+
+	fmt.Println(body)
+	//解析Body参数
+	if err := c.ShouldBind(body); err != nil {
+		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("参数出错%s", err.Error()))
+		return
+	}
+
+	var bodyBytes [][]byte
+	bodyBytes = append(bodyBytes, []byte(body.Key))
+	bodyBytes = append(bodyBytes, []byte(body.Id1))
+	bodyBytes = append(bodyBytes, []byte(body.Id2))
+	
+	//调用智能合约
+	resp, err := bc.ChannelExecute("deleteData", bodyBytes)
+	if err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	var data map[string]interface{}
+	if err = json.Unmarshal(bytes.NewBuffer(resp.Payload).Bytes(), &data); err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	fmt.Println(data)
 	appG.Response(http.StatusOK, "成功", data)
 }
 

@@ -14,13 +14,20 @@ import (
 // CreateRealEstate 新建房地产(管理员)
 func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
-	if len(args) != 4 {
-		return shim.Error("参数个数不满足")
-	}
+	// if len(args) != 9 {
+	// 	return shim.Error("参数个数不满足")
+	// }
 	accountId := args[0] //accountId用于验证是否为管理员
 	proprietor := args[1]
 	totalArea := args[2]
 	livingSpace := args[3]
+	firstname := args[4]
+	lastname := args[5]
+	dob := args[6]
+	gender := args[7]
+	status := args[8]
+	photo := args[9]
+
 	if accountId == "" || proprietor == "" || totalArea == "" || livingSpace == "" {
 		return shim.Error("参数存在空值")
 	}
@@ -49,22 +56,31 @@ func CreateRealEstate(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	if err = json.Unmarshal(resultsAccount[0], &account); err != nil {
 		return shim.Error(fmt.Sprintf("查询操作人信息-反序列化出错: %s", err))
 	}
-	if account.UserName != "管理员" {
-		return shim.Error(fmt.Sprintf("操作人权限不足%s", err))
-	}
+	// if account.UserName != "管理员" {
+	// 	return shim.Error(fmt.Sprintf("操作人权限不足%s", err))
+	// }
 	//判断业主是否存在
 	resultsProprietor, err := utils.GetStateByPartialCompositeKeys(stub, lib.AccountKey, []string{proprietor})
+	
 	if err != nil || len(resultsProprietor) != 1 {
 		return shim.Error(fmt.Sprintf("业主proprietor信息验证失败%s", err))
 	}
+	fmt.Println(resultsProprietor)
 	realEstate := &lib.RealEstate{
 		RealEstateID: fmt.Sprintf("%d", time.Now().Local().UnixNano()),
 		Proprietor:   proprietor,
 		Encumbrance:  false,
 		TotalArea:    formattedTotalArea,
 		LivingSpace:  formattedLivingSpace,
+		Firstname: firstname,
+		Lastname: lastname,
+		DOB:dob,
+		Gender:gender,
+		Status:status,
+		Photo:photo,
 	}
 	// 写入账本
+	
 	if err := utils.WriteLedger(realEstate, stub, lib.RealEstateKey, []string{realEstate.Proprietor, realEstate.RealEstateID}); err != nil {
 		return shim.Error(fmt.Sprintf("%s", err))
 	}

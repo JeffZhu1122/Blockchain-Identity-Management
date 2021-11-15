@@ -7,24 +7,18 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="'https://s1.ax1x.com/2020/03/18/8w2Z2F.jpg'" class="user-avatar">
+          {{ uname}}
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <el-dropdown-item>
-            账户ID: {{ accountId }}
+            User ID: {{ accountId }}
           </el-dropdown-item>
-          <el-dropdown-item>
-            用户名: {{ userName }}
+          <el-dropdown-item class="toCapitalFirst">
+            Role: {{ roles[0] }}
           </el-dropdown-item>
-          <el-dropdown-item>
-            余额: ￥{{ balance }} 元
-          </el-dropdown-item>
-          <a target="_blank" href="https://github.com/togettoyou/blockchain-real-estate">
-            <el-dropdown-item>项目地址</el-dropdown-item>
-          </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">切换账户</span>
+            <span style="display:block;">Logout</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -47,7 +41,9 @@ export default {
       'sidebar',
       'accountId',
       'userName',
-      'balance'
+      'uname',
+      'balance',
+      'roles',
     ])
   },
   methods: {
@@ -63,12 +59,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.toCapitalFirst {
+  text-transform: capitalize;
+}
+.el-dropdown-menu {
+  top: 35px !important;
+}
 .navbar {
-  height: 50px;
+  height: 60px;
   overflow: hidden;
   position: relative;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,21,41,.08);
+
+  .avatar-wrapper,
+  .el-breadcrumb{
+  font-size: 17px;
+  }
 
   .hamburger-container {
     line-height: 46px;
@@ -88,6 +96,7 @@ export default {
   }
 
   .right-menu {
+  margin-top: -20px;
     float: right;
     height: 100%;
     line-height: 50px;
@@ -132,7 +141,7 @@ export default {
           cursor: pointer;
           position: absolute;
           right: -20px;
-          top: 25px;
+          top: 18px;
           font-size: 12px;
         }
       }

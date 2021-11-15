@@ -13,12 +13,15 @@ import (
 // CreateDonating 发起捐赠
 func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 验证参数
-	if len(args) != 3 {
-		return shim.Error("参数个数不满足")
-	}
+	// if len(args) != 3 {
+	// 	return shim.Error("参数个数不满足")
+	// }
 	objectOfDonating := args[0]
 	donor := args[1]
 	grantee := args[2]
+	branchID := args[3]
+	bName := args[4]
+	location := args[4]
 	if objectOfDonating == "" || donor == "" || grantee == "" {
 		return shim.Error("参数存在空值")
 	}
@@ -57,6 +60,9 @@ func CreateDonating(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		Grantee:          grantee,
 		CreateTime:       time.Now().Local().Format("2006-01-02 15:04:05"),
 		DonatingStatus:   lib.DonatingStatusConstant()["donatingStart"],
+		BranchID:  branchID,
+		BName:  bName,
+		Location:  location
 	}
 	// 写入账本
 	if err := utils.WriteLedger(donating, stub, lib.DonatingKey, []string{donating.Donor, donating.ObjectOfDonating, donating.Grantee}); err != nil {

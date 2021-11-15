@@ -3,25 +3,22 @@
     <el-form ref="loginForm" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">基于区块链的房地产交易系统</h3>
+        <h3 class="title">Blockchain–powered Identity Management System</h3>
       </div>
-      <el-select v-model="value" placeholder="请选择用户角色" class="login-select" @change="selectGet">
+      <el-select v-model="value" placeholder="Your ID" class="login-select" @change="selectGet">
         <el-option
           v-for="item in accountList"
           :key="item.accountId"
-          :label="item.userName"
+          :label="item.uname"
           :value="item.accountId"
         >
-          <span style="float: left">{{ item.userName }}</span>
+          <span style="float: left">{{ item.uname }}</span>
           <span style="float: right; color: #8492a6; font-size: 13px">{{ item.accountId }}</span>
         </el-option>
       </el-select>
+      <el-input v-model="password" class="login-select" placeholder="Your Password"></el-input>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">立即进入</el-button>
-
-      <div class="tips">
-        <span style="margin-right:20px;">tips: 选择不同用户角色模拟交易</span>
-      </div>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
 
     </el-form>
   </div>
@@ -37,7 +34,8 @@ export default {
       loading: false,
       redirect: undefined,
       accountList: [],
-      value: ''
+      value: '',
+password:''
     }
   },
   watch: {

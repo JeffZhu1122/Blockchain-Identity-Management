@@ -32,9 +32,9 @@ export default {
       let matched = this.$route.matched.filter(item => item.meta && item.meta.title)
       const first = matched[0]
 
-      if (!this.isHome(first)) {
-        matched = [{ path: '/realestate', meta: { title: '房产信息' }}].concat(matched)
-      }
+      // if (!this.isHome(first)) {
+      //   matched = [{ path: '/realestate', meta: { title: '房产信息' }}].concat(matched)
+      // }
 
       this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
     },

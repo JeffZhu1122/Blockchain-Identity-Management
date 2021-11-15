@@ -3,36 +3,11 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-/* Layout */
 import Layout from '@/layout'
 
-/**
- * Note: sub-menu only appear when route children.length >= 1
- * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
- *
- * hidden: true                   if set true, item will not show in the sidebar(default is false)
- * alwaysShow: true               if set true, will always show the root menu
- *                                if not set alwaysShow, when item has more than one children route,
- *                                it will becomes nested mode, otherwise not show the root menu
- * redirect: noRedirect           if set noRedirect will no redirect in the breadcrumb
- * name:'router-name'             the name is used by <keep-alive> (must set!!!)
- * meta : {
-    roles: ['admin','editor']    control the page roles (you can set multiple roles)
-    title: 'title'               the name show in sidebar and breadcrumb (recommend set)
-    icon: 'svg-name'             the icon show in the sidebar
-    breadcrumb: false            if set false, the item will hidden in breadcrumb(default is true)
-    activeMenu: '/example/list'  if set path, the sidebar will highlight the path you set
-  }
- */
-
-/**
- * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
- */
 export const constantRoutes = [{
   path: '/login',
-  component: () => import('@/views/login/index'),
+  component: () => import('@/views/login'),
   hidden: true
 },
 
@@ -43,16 +18,46 @@ export const constantRoutes = [{
 },
 
 {
+  path: '/people-detail',
+  component: Layout,
+  redirect: '/people-detail',
+  children: [{
+    path: '/people-detail',
+    name: 'PeopleDetail',
+    component: () => import('@/views/peopleDetail'),
+    meta: {
+      title: 'People Detail',
+      icon: 'sellingMe'
+    }
+  }],
+  hidden: true
+},
+
+{
   path: '/',
   component: Layout,
-  redirect: '/realestate',
+  redirect: '/Dashboard',
   children: [{
-    path: 'realestate',
-    name: 'Realestate',
-    component: () => import('@/views/realestate/list/index'),
+    path: 'dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/dashboard'),
     meta: {
-      title: '房产信息',
-      icon: 'realestate'
+      title: 'Dashboard',
+      icon: 'sellingMe'
+    }
+  }]
+},
+{
+  path: '/checkin',
+  component: Layout,
+  redirect: '/checkin',
+  children: [{
+    path: '',
+    name: 'Checkin',
+    component: () => import('@/views/checkin'),
+    meta: {
+      title: 'Checkin',
+      icon: 'sellingBuy'
     }
   }]
 }
@@ -64,103 +69,113 @@ export const constantRoutes = [{
  */
 export const asyncRoutes = [
   {
-    path: '/selling',
+    path: '/people',
     component: Layout,
-    redirect: '/selling/all',
-    name: 'Selling',
+    redirect: '/people/list',
+    name: 'People',
     alwaysShow: true,
     meta: {
-      title: '销售',
-      icon: 'selling'
+      roles: ['admin', 'manager'],
+      title: 'People',
+      icon: 'realestate'
     },
-    children: [{
-      path: 'all',
-      name: 'SellingAll',
-      component: () => import('@/views/selling/all/index'),
-      meta: {
-        title: '所有销售',
-        icon: 'sellingAll'
+    children: [
+      {
+        path: 'list',
+        name: 'PeopleList',
+        component: () => import('@/views/peopleList'),
+        meta: {
+          title: 'All People',
+          icon: 'sellingAll'
+        }
+      },{
+        path: 'add',
+        name: 'addPeople',
+        component: () => import('@/views/addPeople'),
+        meta: {
+          title: 'Add People',
+          icon: 'sellingAll'
+        }
       }
-    },
-    {
-      path: 'me',
-      name: 'SellingMe',
-      component: () => import('@/views/selling/me/index'),
-      meta: {
-        roles: ['editor'],
-        title: '我发起的',
-        icon: 'sellingMe'
-      }
-    }, {
-      path: 'buy',
-      name: 'SellingBuy',
-      component: () => import('@/views/selling/buy/index'),
-      meta: {
-        roles: ['editor'],
-        title: '我购买的',
-        icon: 'sellingBuy'
-      }
-    }
     ]
   },
   {
-    path: '/donating',
+    path: '/agents',
     component: Layout,
-    redirect: '/donating/all',
-    name: 'Donating',
+    redirect: '/agent/list',
+    name: 'People',
     alwaysShow: true,
     meta: {
-      title: '捐赠',
-      icon: 'donating'
+      roles: ['admin', 'manager'],
+      title: 'Agents',
+      icon: 'addRealestate'
     },
-    children: [{
-      path: 'all',
-      name: 'DonatingAll',
-      component: () => import('@/views/donating/all/index'),
-      meta: {
-        title: '所有捐赠',
-        icon: 'donatingAll'
+    children: [
+      {
+        path: 'list',
+        name: 'agentList',
+        component: () => import('@/views/agentList'),
+        meta: {
+          title: 'All Agents',
+          icon: 'sellingAll'
+        }
+      },{
+        path: 'add',
+        name: 'addPeople',
+        component: () => import('@/views/addAgent'),
+        meta: {
+          title: 'Add Agent',
+          icon: 'sellingAll'
+        }
       }
-    },
-    {
-      path: 'donor',
-      name: 'DonatingDonor',
-      component: () => import('@/views/donating/donor/index'),
-      meta: {
-        roles: ['editor'],
-        title: '我发起的捐赠',
-        icon: 'donatingDonor'
-      }
-    }, {
-      path: 'grantee',
-      name: 'DonatingGrantee',
-      component: () => import('@/views/donating/grantee/index'),
-      meta: {
-        roles: ['editor'],
-        title: '我收到的受赠',
-        icon: 'donatingGrantee'
-      }
-    }
     ]
   },
   {
-    path: '/addRealestate',
+    path: '/branches',
     component: Layout,
+    redirect: '/branches/list',
+    name: 'Branches',
+    alwaysShow: true,
     meta: {
-      roles: ['admin']
+      roles: ['admin'],
+      title: 'Branches',
+      icon: 'sellingBuy'
     },
+    children: [
+      {
+        path: 'list',
+        name: 'branchList',
+        component: () => import('@/views/branchList'),
+        meta: {
+          title: 'All Branches',
+          icon: 'sellingAll'
+        }
+      },{
+        path: 'add',
+        name: 'addBranch',
+        component: () => import('@/views/addBranch'),
+        meta: {
+          title: 'Add Branch',
+          icon: 'sellingAll'
+        }
+      }
+    ]
+  },
+  {
+    path: '/records',
+    component: Layout,
+    redirect: '/records',
     children: [{
-      path: '/addRealestate',
-      name: 'AddRealestate',
-      component: () => import('@/views/realestate/add/index'),
+      path: '',
+      name: 'Records',
+      component: () => import('@/views/recordList'),
       meta: {
-        title: '新增房产',
-        icon: 'addRealestate'
+        roles: ['admin', 'manager'],
+        title: 'Records',
+        icon: 'selling'
       }
     }]
   },
-
-  // 404 page must be placed at the end !!!
   {
     path: '*',
     redirect: '/404',
@@ -169,8 +184,7 @@ export const asyncRoutes = [
 ]
 
 const createRouter = () => new Router({
-  base: '/web',
-  // mode: 'history', // require service support
+  mode: 'history',
   scrollBehavior: () => ({
     y: 0
   }),
@@ -179,7 +193,6 @@ const createRouter = () => new Router({
 
 const router = createRouter()
 
-// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router

@@ -15,6 +15,7 @@ const getDefaultState = () => {
     token: getToken(),
     accountId: '',
     userName: '',
+    uname: '',
     balance: 0,
     roles: []
   }
@@ -37,6 +38,9 @@ const mutations = {
   },
   SET_BALANCE: (state, balance) => {
     state.balance = balance
+  },
+  SET_UNAME: (state, uname) => {
+    state.uname = uname
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
@@ -73,15 +77,18 @@ const actions = {
         }]
       }).then(response => {
         var roles
-        if (response[0].userName === '管理员') {
+        if (response[0].level === 0) {
           roles = ['admin']
+        } else if (response[0].level === 2) {
+          roles = ['agent']
         } else {
-          roles = ['editor']
+          roles = ['manager']
         }
         commit('SET_ROLES', roles)
         commit('SET_ACCOUNTID', response[0].accountId)
         commit('SET_USERNAME', response[0].userName)
         commit('SET_BALANCE', response[0].balance)
+        commit('SET_UNAME', response[0].uname)
         resolve(roles)
       }).catch(error => {
         reject(error)
